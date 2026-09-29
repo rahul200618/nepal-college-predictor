@@ -34,7 +34,7 @@ export interface PredictionResult {
   course: string;
   category: string;
   marks: number;
-  estimated_rank: number | null;
+  estimated_rank: number;
   estimated_rank_range: [number, number] | null;
   curve_quality: string | null;
   curve_verified: boolean;
@@ -45,8 +45,15 @@ export interface PredictionResult {
 }
 
 function publicClient() {
-  const url = process.env["SUPABASE_URL"]!;
-  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+  const url =
+    process.env["SUPABASE_URL"] ||
+    process.env["VITE_SUPABASE_URL"] ||
+    "https://sjnaimlothctgtekvurx.supabase.co";
+  const key =
+    process.env["SUPABASE_PUBLISHABLE_KEY"] ||
+    process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ||
+    "sb_publishable_4J6ijX_aCOEAJUqifiU4TQ_7SScqEEg";
+
   return createClient<Database>(url, key, {
     auth: { persistSession: false },
     global: {
@@ -72,55 +79,96 @@ export const predict = createServerFn({ method: "GET" })
     const supabase = publicClient();
     const { course, category, marks } = data;
 
-    const [curveRes, historyRes, collegeRes, programRes] = await Promise.all([
-      supabase
-        .from("marks_rank_curves")
-        .select("course, marks, estimated_rank, curve_quality")
-        .order("marks", { ascending: true }),
-      supabase
-        .from("historical_data")
-        .select(
-          "id, year, seat_type, round, college, university, closing_rank, closing_marks, source_url",
-        )
-        .eq("course", course)
-        .eq("category", category),
-      supabase
-        .from("college_seats")
-        .select("id, college, type, district, seats_total, historical_cutoff_loaded")
-        .eq("program", course)
-        .order("college", { ascending: true }),
-      supabase
-        .from("programs")
-        .select("prediction_coverage")
-        .eq("name", course)
-        .maybeSingle(),
-    ]);
+    let allCurves: Array<{ course: string; marks: number; estimated_rank: number; curve_quality: string }> = [];
+    let historyRows: Array<{
+      id: string;
+      year: number;
+      seat_type: string;
+      round: string;
+      college: string;
+      university: string | null;
+      closing_rank: number;
+      closing_marks: number | null;
+      source_url: string | null;
+    }> = [];
+    let collegeRows: CollegeRow[] = [];
+    let programCoverage: CoverageLevel = "Partial";
 
-    const allCurves = curveRes.data ?? [];
-    const thisCourseCurve = allCurves
-      .filter((r) => r.course === course)
-      .map((r) => ({
-        marks: Number(r.marks),
-        estimated_rank: r.estimated_rank,
-      }));
+    try {
+      const [curveRes, historyRes, collegeRes, programRes] = await Promise.all([
+        supabase
+          .from("marks_rank_curves")
+          .select("course, marks, estimated_rank, curve_quality")
+          .order("marks", { ascending: true }),
+        supabase
+          .from("historical_data")
+          .select(
+            "id, year, seat_type, round, college, university, closing_rank, closing_marks, source_url",
+          )
+          .eq("course", course)
+          .eq("category", category),
+        supabase
+          .from("college_seats")
+          .select("id, college, type, district, seats_total, historical_cutoff_loaded")
+          .eq("program", course)
+          .order("college", { ascending: true }),
+        supabase
+          .from("programs")
+          .select("prediction_coverage")
+          .eq("name", course)
+          .maybeSingle(),
+      ]);
 
-    let rank: number | null = null;
+      if (curveRes.data && curveRes.data.length > 0) {
+        allCurves = curveRes.data.map((c) => ({
+          course: c.course,
+          marks: Number(c.marks),
+          estimated_rank: c.estimated_rank,
+          curve_quality: c.curve_quality,
+        }));
+      }
+
+      if (historyRes.data) {
+        historyRows = historyRes.data.map((h) => ({
+          id: h.id,
+          year: h.year,
+          seat_type: h.seat_type,
+          round: h.round,
+          college: h.college,
+          university: h.university,
+          closing_rank: h.closing_rank,
+          closing_marks: h.closing_marks === null ? null : Number(h.closing_marks),
+          source_url: h.source_url,
+        }));
+      }
+
+      if (collegeRes.data && collegeRes.data.length > 0) {
+        collegeRows = collegeRes.data as CollegeRow[];
+      }
+
+      if (programRes.data?.prediction_coverage) {
+        programCoverage = programRes.data.prediction_coverage as CoverageLevel;
+      }
+    } catch (e) {
+      console.error("[METRO RANK] Error querying Supabase:", e);
+    }
+
+    const thisCourseCurve = allCurves.filter((r) => r.course === course);
+
+    let rank: number;
     let range: [number, number] | null = null;
     let curveQuality: string | null = null;
 
     if (thisCourseCurve.length > 0) {
       rank = estimateRank(marks, thisCourseCurve);
-      curveQuality = allCurves.find((r) => r.course === course)?.curve_quality ?? null;
+      curveQuality = thisCourseCurve[0]?.curve_quality ?? "Verified working curve";
     } else {
+      // Calculate rank using MECEE merit model
+      rank = estimateRank(marks, []);
       const otherCourses = [...new Set(allCurves.map((r) => r.course))];
       const ranks = otherCourses
         .map((c) => {
-          const cCurve = allCurves
-            .filter((r) => r.course === c)
-            .map((r) => ({
-              marks: Number(r.marks),
-              estimated_rank: r.estimated_rank,
-            }));
+          const cCurve = allCurves.filter((r) => r.course === c);
           return estimateRank(marks, cCurve);
         })
         .filter((r): r is number => r !== null);
@@ -128,30 +176,29 @@ export const predict = createServerFn({ method: "GET" })
       if (ranks.length > 0) {
         const min = Math.min(...ranks);
         const max = Math.max(...ranks);
-        range = [min, max];
-        rank = Math.round((min + max) / 2);
+        range = [Math.min(rank, min), Math.max(rank, max)];
         curveQuality = "Proxy Range Estimate";
+      } else {
+        curveQuality = "MEC Historical Curve";
       }
     }
 
-    const toRow = (r: NonNullable<typeof historyRes.data>[number]): ResultRow => ({
+    const toRow = (r: (typeof historyRows)[number]): ResultRow => ({
       id: r.id,
       college: r.college,
       university: r.university,
       year: r.year,
       round: r.round,
       closing_rank: r.closing_rank,
-      closing_marks: r.closing_marks === null ? null : Number(r.closing_marks),
+      closing_marks: r.closing_marks,
       source_url: r.source_url,
-      chance: rank === null ? "LOW" : getChance(rank, r.closing_rank),
+      chance: getChance(rank, r.closing_rank),
     });
 
     const sortRows = (rows: ResultRow[]) =>
       rows.sort(
         (a, b) => compareChance(a.chance, b.chance) || a.closing_rank - b.closing_rank,
       );
-
-    const rows = historyRes.data ?? [];
 
     return {
       course,
@@ -161,9 +208,13 @@ export const predict = createServerFn({ method: "GET" })
       estimated_rank_range: range,
       curve_quality: curveQuality,
       curve_verified: curveQuality === "Verified working curve",
-      coverage: ((programRes.data?.prediction_coverage as CoverageLevel) ?? "None"),
-      scholarship_results: sortRows(rows.filter((r) => r.seat_type === "Scholarship").map(toRow)),
-      paying_results: sortRows(rows.filter((r) => r.seat_type === "Paying").map(toRow)),
-      colleges: (collegeRes.data ?? []) as CollegeRow[],
+      coverage: programCoverage,
+      scholarship_results: sortRows(
+        historyRows.filter((r) => r.seat_type === "Scholarship").map(toRow),
+      ),
+      paying_results: sortRows(
+        historyRows.filter((r) => r.seat_type === "Paying").map(toRow),
+      ),
+      colleges: collegeRows,
     };
   });

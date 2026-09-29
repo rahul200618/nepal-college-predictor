@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResultsRouteImport } from './routes/results'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ApiAiSummaryRouteImport } from './routes/api/ai-summary'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,9 +20,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiSummaryRoute = ApiAiSummaryRouteImport.update({
@@ -31,31 +43,39 @@ const ApiAiSummaryRoute = ApiAiSummaryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
+  '/signup': typeof SignupRoute
   '/api/ai-summary': typeof ApiAiSummaryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
+  '/signup': typeof SignupRoute
   '/api/ai-summary': typeof ApiAiSummaryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/results': typeof ResultsRoute
+  '/signup': typeof SignupRoute
   '/api/ai-summary': typeof ApiAiSummaryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/results' | '/api/ai-summary'
+  fullPaths: '/' | '/login' | '/results' | '/signup' | '/api/ai-summary'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/results' | '/api/ai-summary'
-  id: '__root__' | '/' | '/results' | '/api/ai-summary'
+  to: '/' | '/login' | '/results' | '/signup' | '/api/ai-summary'
+  id: '__root__' | '/' | '/login' | '/results' | '/signup' | '/api/ai-summary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
   ResultsRoute: typeof ResultsRoute
+  SignupRoute: typeof SignupRoute
   ApiAiSummaryRoute: typeof ApiAiSummaryRoute
 }
 
@@ -68,11 +88,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results': {
       id: '/results'
       path: '/results'
       fullPath: '/results'
       preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai-summary': {
@@ -87,7 +121,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
   ResultsRoute: ResultsRoute,
+  SignupRoute: SignupRoute,
   ApiAiSummaryRoute: ApiAiSummaryRoute,
 }
 export const routeTree = rootRouteImport
