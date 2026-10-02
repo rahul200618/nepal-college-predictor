@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -160,13 +161,46 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { useAuth } from "@/contexts/AuthContext";
+import { MessageCircle } from "lucide-react";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <AppLayout />
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
+
+function AppLayout() {
+  const { platformSettings } = useAuth();
+  
+  return (
+    <>
+      {platformSettings?.platformAds && (
+        <div className="bg-muted border-b p-2 text-center text-xs text-muted-foreground">
+          Advertisement Placeholder
+        </div>
+      )}
+      
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-    </QueryClientProvider>
+
+      {platformSettings?.counselingWidget && (
+        <a
+          href="https://wa.me/9779800000000"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-xl hover:scale-110 transition-transform"
+          title="Chat on WhatsApp"
+        >
+          <MessageCircle className="size-7" />
+        </a>
+      )}
+    </>
   );
 }

@@ -1,37 +1,28 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { User, LogOut, ChevronDown } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { User, LogOut, ChevronDown, Phone, Shield, Code } from "lucide-react";
+import { subscribeToAuth, signOutUser, type MetroUser } from "@/lib/auth";
+import { isPhoneGrantedAdmin, isDeveloperUnlocked } from "@/lib/admin-access";
 import { cn } from "@/lib/utils";
 
 export function UserNav() {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [user, setUser] = useState<MetroUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Get initial session
-    void supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const unsubscribe = subscribeToAuth((currentUser) => {
+      setUser(currentUser);
       setLoading(false);
     });
 
     return () => {
-      subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOutUser();
     setUser(null);
     setMenuOpen(false);
   };
@@ -65,8 +56,13 @@ export function UserNav() {
 
   const displayName =
     (user.user_metadata?.["full_name"] as string | undefined) ||
-    user.email?.split("@")[0] ||
+    user.phone ||
     "Aspirant";
+
+  // Format phone for display: +977 98XXXXXXXX → +977 98XX XXXX
+  const displayPhone = user.phone
+    ? user.phone.replace(/(\+\d{1,4})(\d{4})(\d+)/, "$1 $2 $3")
+    : "";
 
   const initial = displayName.charAt(0).toUpperCase();
 
@@ -80,32 +76,66 @@ export function UserNav() {
         <div className="flex size-7 items-center justify-center rounded-lg gradient-nepal text-white text-xs font-bold shadow-xs">
           {initial}
         </div>
-        <span className="text-xs font-semibold text-foreground max-w-[100px] truncate hidden sm:inline-block">
+        <span className="text-xs font-semibold text-foreground max-w-[100px] truncate">
           {displayName}
         </span>
-        <ChevronDown className="size-3 text-muted-foreground" />
+        <ChevronDown className={cn("size-3 text-muted-foreground transition-transform", menuOpen && "rotate-180")} />
       </button>
 
       {menuOpen && (
-        <div
-          className="absolute right-0 mt-2 w-56 rounded-2xl border border-border/60 bg-card p-2 shadow-xl z-50 animate-scale-in"
-          onClick={() => setMenuOpen(false)}
-        >
-          <div className="px-3 py-2 border-b border-border/40">
-            <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
-            <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
-          </div>
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setMenuOpen(false)}
+          />
+          <div
+            className="absolute right-0 mt-2 w-60 rounded-2xl border border-border/60 bg-card p-2 shadow-xl z-50 animate-scale-in"
+          >
+            <div className="px-3 py-2.5 border-b border-border/40">
+              <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
+              {displayPhone && (
+                <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                  <Phone className="size-3 shrink-0" />
+                  {displayPhone}
+                </p>
+              )}
+            </div>
 
-          <div className="pt-1">
-            <button
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-danger hover:bg-danger/10 transition-colors"
-            >
-              <LogOut className="size-3.5" />
-              <span>Sign out</span>
-            </button>
+            {(isPhoneGrantedAdmin(user.phone) || isDeveloperUnlocked()) && (
+              <div className="py-1 border-b border-border/40 space-y-0.5">
+                <Link
+                  to="/admin"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-foreground hover:bg-secondary transition-colors"
+                >
+                  <Shield className="size-3.5 text-accent" />
+                  <span>Admin Console</span>
+                </Link>
+                {isDeveloperUnlocked() && (
+                  <Link
+                    to="/developer"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <Code className="size-3.5 text-primary" />
+                    <span>Developer Portal</span>
+                  </Link>
+                )}
+              </div>
+            )}
+
+            <div className="pt-1">
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-danger hover:bg-danger/10 transition-colors"
+              >
+                <LogOut className="size-3.5" />
+                <span>Sign out</span>
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -63,6 +63,25 @@ export function MarksSlider({
         <span>150</span>
         <span>200</span>
       </div>
+
+      {/* Mobile-friendly quick presets */}
+      <div className="pt-1 flex items-center justify-between gap-1.5 flex-wrap">
+        <span className="text-[11px] font-medium text-muted-foreground mr-1">Presets:</span>
+        {[80, 105, 125, 145, 165].map((preset) => (
+          <button
+            key={preset}
+            type="button"
+            onClick={() => onChange(preset)}
+            className={`rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all active:scale-95 ${
+              Math.round(value) === preset
+                ? "border-accent bg-accent text-white shadow-xs"
+                : "border-border/60 bg-secondary/50 text-foreground hover:bg-secondary"
+            }`}
+          >
+            {preset}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getCurrentUser, subscribeToAuth, type MetroUser } from "@/lib/auth";
 import {
   ArrowRight,
   GraduationCap,
@@ -25,6 +26,7 @@ import { MarksSlider } from "@/components/cee/MarksSlider";
 import { CATEGORIES, COURSES, DATA_NOTE } from "@/lib/cee-constants";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserNav } from "@/components/UserNav";
+import { useAuth } from "@/contexts/AuthContext";
 import { QuotaBreakdownCard } from "@/components/cee/QuotaBreakdownCard";
 import { Landmark, Compass, Award, CheckCircle2 } from "lucide-react";
 
@@ -105,17 +107,45 @@ function Step({
 
 function Home() {
   const navigate = useNavigate();
+  const { platformSettings } = useAuth();
   const [course, setCourse] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [marks, setMarks] = useState(80);
+  const [user, setUser] = useState<MetroUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    void getCurrentUser().then((u) => {
+      setUser(u);
+      setAuthLoading(false);
+    });
+    const unsub = subscribeToAuth((u) => {
+      setUser(u);
+      setAuthLoading(false);
+    });
+    return unsub;
+  }, []);
 
   const ready = course !== "" && category !== "";
+
+  const handlePredict = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ready) return;
+    if (!user) {
+      void navigate({ to: "/login" });
+      return;
+    }
+    void navigate({
+      to: "/results",
+      search: { course, category, marks },
+    });
+  };
 
   return (
     <main className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 glass border-b border-border/40">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-3.5 py-2.5 sm:px-8 sm:py-3">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="flex size-9 items-center justify-center rounded-lg gradient-nepal shadow-md transition-transform group-hover:scale-105">
               <GraduationCap className="size-5 text-white" />
@@ -129,7 +159,7 @@ function Home() {
               </span>
             </div>
           </Link>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <ThemeToggle />
             <UserNav />
           </div>
@@ -139,51 +169,57 @@ function Home() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 gradient-hero opacity-[0.03]" />
-        <div className="absolute top-20 right-10 size-72 rounded-full bg-accent/5 blur-3xl" />
-        <div className="absolute bottom-10 left-10 size-96 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute top-20 right-10 size-72 rounded-full bg-accent/5 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 left-10 size-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
 
-        <div className="relative mx-auto max-w-6xl px-5 pt-16 pb-12 sm:px-8 sm:pt-24 sm:pb-16">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+        <div className="relative mx-auto max-w-6xl px-4 pt-8 pb-8 sm:px-8 sm:pt-24 sm:pb-16">
+          <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
             {/* Left: Hero copy */}
             <div className="animate-slide-up">
-              <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-4 py-1.5 text-[13px] font-semibold text-accent">
+              <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-3.5 py-1 text-[12px] sm:text-[13px] font-semibold text-accent">
                 <Sparkles className="size-3.5" />
                 2026 MEC Official Data
               </div>
-              <h1 className="mt-5 text-4xl font-extrabold leading-tight text-foreground sm:text-5xl lg:text-[56px] lg:leading-[1.1]">
+              <h1 className="mt-4 text-3xl font-extrabold leading-tight text-foreground sm:text-5xl lg:text-[56px] lg:leading-[1.1]">
                 Know Your
                 <br />
                 <span className="text-gradient">College Chances</span>
                 <br />
                 Before Results Drop
               </h1>
-              <p className="mt-5 max-w-lg text-[16px] leading-relaxed text-muted-foreground">
+              <p className="mt-4 max-w-lg text-[15px] sm:text-[16px] leading-relaxed text-muted-foreground">
                 METRO RANK uses real MECEE-BL cutoff data from 2024–25 admission
                 cycles to estimate your rank and show your scholarship & paying
                 chances at every medical college in Nepal.
               </p>
 
               {/* Stats row */}
-              <div className="mt-8 flex flex-wrap items-center gap-8 sm:gap-12">
+              <div className="mt-6 flex items-center justify-around sm:justify-start gap-3 sm:gap-12 py-3.5 px-4 sm:px-0 sm:py-0 rounded-2xl bg-card/70 sm:bg-transparent border sm:border-0 border-border/50 shadow-xs sm:shadow-none">
                 <StatItem value="82" label="Colleges" />
+                <div className="w-px h-8 bg-border/60 sm:hidden" />
                 <StatItem value="16" label="Programs" />
+                <div className="w-px h-8 bg-border/60 sm:hidden" />
                 <StatItem value="14" label="Quotas" />
               </div>
             </div>
 
-            {/* Right: Prediction form */}
+            {/* Right: Prediction form or Maintenance */}
             <div className="animate-slide-up" style={{ animationDelay: "0.15s" }}>
-              <form
-                className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xl"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!ready) return;
-                  void navigate({
-                    to: "/results",
-                    search: { course, category, marks },
-                  });
-                }}
-              >
+              {platformSettings?.maintenanceMode ? (
+                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xl p-8 text-center flex flex-col items-center justify-center min-h-[400px]">
+                  <div className="rounded-full bg-amber-500/10 p-4 mb-4">
+                    <Shield className="size-10 text-amber-500" />
+                  </div>
+                  <h2 className="text-xl font-bold text-foreground mb-2">Maintenance Mode</h2>
+                  <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">
+                    The predictor is currently in read-only mode during MEC official list releases. Please check back soon.
+                  </p>
+                </div>
+              ) : (
+                <form
+                  className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-xl"
+                  onSubmit={handlePredict}
+                >
                 <div className="gradient-nepal px-6 py-5 sm:px-8">
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
                     <BarChart3 className="size-5" />
@@ -240,19 +276,38 @@ function Home() {
                   <Button
                     type="submit"
                     size="lg"
-                    disabled={!ready}
+                    disabled={!ready || authLoading}
                     className="w-full rounded-xl bg-accent text-accent-foreground font-bold text-[15px] shadow-lg transition-all hover:shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
                   >
-                    Predict Now
-                    <ArrowRight className="ml-2 size-4" aria-hidden />
+                    {authLoading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Loading...
+                      </span>
+                    ) : (
+                      <>
+                        {user ? "Predict Now" : "Log in to Predict"}
+                        <ArrowRight className="ml-2 size-4" aria-hidden />
+                      </>
+                    )}
                   </Button>
-                  {!ready && (
+                  {!ready && !authLoading && (
                     <p className="mt-3 text-center text-[13px] text-muted-foreground">
                       Pick a course and category to continue
                     </p>
                   )}
+                  {ready && !user && !authLoading && (
+                    <p className="mt-3 text-center text-[13px] text-muted-foreground">
+                      You need to{" "}
+                      <Link to="/login" className="font-semibold text-accent hover:underline">
+                        log in
+                      </Link>{" "}
+                      to see your prediction results
+                    </p>
+                  )}
                 </div>
               </form>
+              )}
             </div>
           </div>
         </div>
@@ -393,7 +448,7 @@ function Home() {
       {/* Footer */}
       <footer className="border-t border-border/40 bg-card">
         <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex flex-col items-center justify-between gap-5 sm:flex-row">
             <div className="flex items-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-md gradient-nepal">
                 <GraduationCap className="size-4 text-white" />

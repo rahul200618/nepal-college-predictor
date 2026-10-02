@@ -109,14 +109,16 @@ function Results() {
     <main className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 glass border-b border-border/40">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
-          <div className="flex items-center gap-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-3.5 py-2.5 sm:px-8 sm:py-3">
+          <div className="flex items-center gap-2">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              className="inline-flex items-center justify-center size-9 sm:w-auto sm:px-3 sm:py-1.5 rounded-xl border border-border/60 bg-card/80 text-foreground hover:bg-secondary transition-all active:scale-95"
+              aria-label="New prediction"
+              title="Start a new prediction"
             >
-              <ArrowLeft className="size-4" aria-hidden />
-              <span className="hidden sm:inline">New prediction</span>
+              <ArrowLeft className="size-4 shrink-0" aria-hidden />
+              <span className="hidden sm:inline sm:ml-1.5 text-xs font-semibold">New</span>
             </Link>
           </div>
 
@@ -129,7 +131,7 @@ function Results() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => {
                 void navigator.share?.({
@@ -140,11 +142,12 @@ function Results() {
                   void navigator.clipboard.writeText(window.location.href);
                 });
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              className="inline-flex items-center justify-center size-9 sm:w-auto sm:px-3 rounded-xl border border-border/60 bg-card/80 text-foreground hover:bg-secondary transition-all active:scale-95"
               aria-label="Share results"
+              title="Share or copy results link"
             >
-              <Share2 className="size-4" />
-              <span className="hidden sm:inline">Share</span>
+              <Share2 className="size-4 text-muted-foreground" />
+              <span className="hidden sm:inline sm:ml-1.5 text-xs font-semibold">Share</span>
             </button>
             <ThemeToggle />
             <UserNav />
@@ -152,7 +155,7 @@ function Results() {
         </div>
       </nav>
 
-      <div className="mx-auto max-w-6xl space-y-8 px-5 py-8 sm:px-8 animate-slide-up">
+      <div className="mx-auto max-w-6xl space-y-6 sm:space-y-8 px-3.5 py-5 sm:px-8 sm:py-8 animate-slide-up">
         <h1 className="sr-only">
           CEE prediction for {data.course}, {data.category} category
         </h1>
@@ -169,27 +172,27 @@ function Results() {
         />
 
         {/* Quick Jump Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-accent/25 bg-accent/5 px-4 py-3 sm:px-5">
-          <div className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-foreground">
-            <span className="size-2 rounded-full bg-success animate-pulse" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-accent/25 bg-accent/5 p-3.5 sm:px-5">
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-foreground">
+            <span className="size-2 rounded-full bg-success animate-pulse shrink-0" />
             <span>
               Matches: <strong className="text-accent">{data.paying_results.length} Paying</strong> &amp;{" "}
               <strong className="text-success">{data.scholarship_results.length} Scholarship</strong> colleges below
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
             <a
               href="#colleges"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-card px-3 py-1.5 text-xs font-bold text-foreground shadow-xs border border-border/60 hover:border-accent hover:text-accent transition-all"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-card px-3 py-2 text-xs font-bold text-foreground shadow-xs border border-border/60 hover:border-accent hover:text-accent transition-all active:scale-95"
             >
               <span>View Colleges</span>
               <ArrowLeft className="size-3 -rotate-90" />
             </a>
             <a
               href="#counseling-tips"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground shadow-xs border border-border/60 hover:text-foreground transition-all"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-card px-3 py-2 text-xs font-semibold text-muted-foreground shadow-xs border border-border/60 hover:text-foreground transition-all active:scale-95"
             >
-              <span>Counseling Tips &amp; Quotas ↓</span>
+              <span>Tips &amp; Quotas ↓</span>
             </a>
           </div>
         </div>

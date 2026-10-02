@@ -207,28 +207,30 @@ export function CounselingTips(props: CounselingTipsProps) {
 
   return (
     <section className="space-y-3.5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-2.5 group text-left"
+          className="flex items-center gap-2 sm:gap-2.5 group text-left min-w-0"
         >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-accent/10">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/10">
             <Lightbulb className="size-4 text-accent" />
           </div>
-          <h2 className="text-xl font-bold text-foreground">
-            Counseling Tips & Actionable Insights
-          </h2>
-          <span className="rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[11px] font-bold text-accent">
-            {tips.length} insights
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-base sm:text-xl font-bold text-foreground">
+              Counseling Tips &amp; Insights
+            </h2>
+            <span className="rounded-full bg-accent/10 border border-accent/20 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-accent">
+              {tips.length} insights
+            </span>
+          </div>
         </button>
 
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
+          className="text-xs font-semibold text-accent hover:underline flex items-center gap-1 shrink-0"
         >
           <span>{expanded ? "Collapse" : "Expand"}</span>
-          {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+          {expanded ? <ChevronUp className="size-3.5 sm:size-4" /> : <ChevronDown className="size-3.5 sm:size-4" />}
         </button>
       </div>
 

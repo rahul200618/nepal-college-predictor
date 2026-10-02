@@ -335,10 +335,10 @@ export function FilterableCollegeTable({
 
         {/* Filter chips container */}
         {showFilters && (
-          <div className="rounded-2xl border border-border/50 bg-card/60 p-4 space-y-3 animate-fade-in">
+          <div className="rounded-2xl border border-border/50 bg-card/60 p-3.5 sm:p-4 space-y-3.5 animate-fade-in">
             {/* Type filters */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider min-w-[72px]">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="w-full sm:w-auto text-[11px] font-bold text-muted-foreground uppercase tracking-wider sm:min-w-[72px]">
                 Type:
               </span>
               <FilterChip
@@ -362,8 +362,8 @@ export function FilterableCollegeTable({
             </div>
 
             {/* University filters */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider min-w-[72px] flex items-center gap-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="w-full sm:w-auto text-[11px] font-bold text-muted-foreground uppercase tracking-wider sm:min-w-[72px] flex items-center gap-1">
                 <School className="size-3" /> Univ:
               </span>
               <FilterChip
@@ -383,8 +383,8 @@ export function FilterableCollegeTable({
             </div>
 
             {/* Province filters */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider min-w-[72px] flex items-center gap-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="w-full sm:w-auto text-[11px] font-bold text-muted-foreground uppercase tracking-wider sm:min-w-[72px] flex items-center gap-1">
                 <Compass className="size-3" /> Province:
               </span>
               <FilterChip
@@ -404,8 +404,8 @@ export function FilterableCollegeTable({
 
             {/* Popular District filters */}
             {popularDistricts.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider min-w-[72px] flex items-center gap-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="w-full sm:w-auto text-[11px] font-bold text-muted-foreground uppercase tracking-wider sm:min-w-[72px] flex items-center gap-1">
                   <MapPin className="size-3" /> District:
                 </span>
                 <FilterChip

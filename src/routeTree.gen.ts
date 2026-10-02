@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DeveloperRouteImport } from './routes/developer'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as Login2RouteImport } from './routes/login2'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ApiAiSummaryRouteImport } from './routes/api/ai-summary'
@@ -20,9 +24,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeveloperRoute = DeveloperRouteImport.update({
+  id: '/developer',
+  path: '/developer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Login2Route = Login2RouteImport.update({
+  id: '/login2',
+  path: '/login2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultsRoute = ResultsRouteImport.update({
@@ -43,14 +67,22 @@ const ApiAiSummaryRoute = ApiAiSummaryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/developer': typeof DeveloperRoute
   '/login': typeof LoginRoute
+  '/login2': typeof Login2Route
   '/results': typeof ResultsRoute
   '/signup': typeof SignupRoute
   '/api/ai-summary': typeof ApiAiSummaryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/developer': typeof DeveloperRoute
   '/login': typeof LoginRoute
+  '/login2': typeof Login2Route
   '/results': typeof ResultsRoute
   '/signup': typeof SignupRoute
   '/api/ai-summary': typeof ApiAiSummaryRoute
@@ -58,22 +90,58 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/developer': typeof DeveloperRoute
   '/login': typeof LoginRoute
+  '/login2': typeof Login2Route
   '/results': typeof ResultsRoute
   '/signup': typeof SignupRoute
   '/api/ai-summary': typeof ApiAiSummaryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/results' | '/signup' | '/api/ai-summary'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/developer'
+    | '/login'
+    | '/login2'
+    | '/results'
+    | '/signup'
+    | '/api/ai-summary'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/results' | '/signup' | '/api/ai-summary'
-  id: '__root__' | '/' | '/login' | '/results' | '/signup' | '/api/ai-summary'
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/developer'
+    | '/login'
+    | '/login2'
+    | '/results'
+    | '/signup'
+    | '/api/ai-summary'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/developer'
+    | '/login'
+    | '/login2'
+    | '/results'
+    | '/signup'
+    | '/api/ai-summary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AuthRoute: typeof AuthRoute
+  DeveloperRoute: typeof DeveloperRoute
   LoginRoute: typeof LoginRoute
+  Login2Route: typeof Login2Route
   ResultsRoute: typeof ResultsRoute
   SignupRoute: typeof SignupRoute
   ApiAiSummaryRoute: typeof ApiAiSummaryRoute
@@ -88,11 +156,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/developer': {
+      id: '/developer'
+      path: '/developer'
+      fullPath: '/developer'
+      preLoaderRoute: typeof DeveloperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login2': {
+      id: '/login2'
+      path: '/login2'
+      fullPath: '/login2'
+      preLoaderRoute: typeof Login2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/results': {
@@ -121,7 +217,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AuthRoute: AuthRoute,
+  DeveloperRoute: DeveloperRoute,
   LoginRoute: LoginRoute,
+  Login2Route: Login2Route,
   ResultsRoute: ResultsRoute,
   SignupRoute: SignupRoute,
   ApiAiSummaryRoute: ApiAiSummaryRoute,

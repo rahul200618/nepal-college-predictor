@@ -40,7 +40,7 @@ function CutoffProgressBar({
 
   return (
     <div className="w-full space-y-1">
-      <div className="relative h-2 w-full max-w-[130px] rounded-full bg-secondary overflow-hidden border border-border/40">
+      <div className="relative h-2 w-full max-w-full sm:max-w-[140px] rounded-full bg-secondary overflow-hidden border border-border/40">
         <div
           className="absolute top-0 bottom-0 left-0 bg-primary/20 border-r border-primary/50"
           style={{ width: `${cutoffPct}%` }}
@@ -53,7 +53,7 @@ function CutoffProgressBar({
           style={{ width: `${studentPct}%` }}
         />
       </div>
-      <div className="flex justify-between text-[10px] text-muted-foreground max-w-[130px]">
+      <div className="flex justify-between text-[10px] text-muted-foreground w-full max-w-full sm:max-w-[140px]">
         <span
           className={cn(
             "font-semibold",

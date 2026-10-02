@@ -11,28 +11,28 @@ export function QuotaBreakdownCard({ selectedCategory }: { selectedCategory: str
       <div className="flex items-center justify-between">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2.5 text-left group w-full justify-between"
+          className="flex flex-col sm:flex-row sm:items-center gap-2.5 text-left group w-full justify-between"
         >
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-accent/10">
+          <div className="flex items-start sm:items-center gap-2.5">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 mt-0.5 sm:mt-0">
               <Users className="size-4 text-accent" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <span>Nepal MEC Quota & Reservation Breakdown</span>
-                <span className="hidden sm:inline-block text-[11px] font-normal text-muted-foreground">
-                  (चिकित्सा शिक्षा आयोग आरक्षण सिट विवरण)
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2 flex-wrap">
+                <span>Nepal MEC Quota Breakdown</span>
+                <span className="text-[11px] font-normal text-muted-foreground">
+                  (आरक्षण सिट विवरण)
                 </span>
               </h3>
-              <p className="text-xs text-muted-foreground">
-                Current selection: <strong className="text-accent">{selectedCategory}</strong> · 55% Open, 45% Reserved Quota
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Current: <strong className="text-accent">{selectedCategory}</strong> · 55% Open, 45% Reserved Quota
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-accent font-semibold shrink-0">
+          <div className="flex items-center gap-1 text-xs text-accent font-semibold self-start sm:self-auto shrink-0 bg-accent/5 px-2.5 py-1 rounded-lg sm:bg-transparent sm:p-0">
             <span>{isOpen ? "Hide details" : "View breakdown"}</span>
-            {isOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+            {isOpen ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
           </div>
         </button>
       </div>
